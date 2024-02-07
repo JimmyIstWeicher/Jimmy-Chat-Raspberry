@@ -152,11 +152,23 @@ async function generateAnswer(question) {
   try {
     const result = await chat.sendMessageStream(question);
 
+    let sentence = ""; // Variable für den aktuellen Satz
+
     for await (const chunk of result.stream) {
       const chunkText = chunk.text();
 
-      output.innerHTML += chunkText;
-      await tts(removeFunction(chunkText));
+      for (let i = 0; i < chunkText.length; i++) {
+        const character = chunkText[i];
+        sentence += character; // Füge das Zeichen zum aktuellen Satz hinzu
+        output.innerHTML += character; // Füge das Zeichen zur Ausgabe hinzu
+
+        // Überprüfe, ob das aktuelle Zeichen ein Satzzeichen ist
+        if ([".", "!", "?"].includes(character)) {
+          // Vorgelesen wird der Satz, wenn ein Satzzeichen gefunden wird
+          await tts(removeFunction(sentence));
+          sentence = ""; // Setze den Satz zurück, um einen neuen Satz zu beginnen
+        }
+      }
     }
 
     // Nachdem die Antwort generiert wurde, die Spracherkennung fortsetzen
@@ -186,7 +198,7 @@ async function tts(text) {
 }
 
 function removeFunction(inputString) {
-  return inputString.replace(/[^\w\säöüÄÖÜ,.!?ß]/g, "");
+  return inputString.replace(/[^\w\säöüÄÖÜ,.!?ß'<>¹²³⁴⁵⁶⁷⁸⁹⁰]/g, "");
 }
 speechRecognition.start();
 
