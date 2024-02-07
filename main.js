@@ -125,7 +125,7 @@ speechRecognition.onend = async () => {
     finalTranscript.length > 13
   ) {
     console.log("Fertig...");
-    await playAudio(generating);
+    generating.play();
     const pos = finalTranscript.toLowerCase().indexOf("hallo teddy") + 12;
     const sending = finalTranscript.slice(pos);
     generateAnswer(sending);
@@ -147,8 +147,6 @@ form.onsubmit = async (ev) => {
 };
 
 async function generateAnswer(question) {
-  window.speechSynthesis.cancel();
-
   output.textContent = "Generating...";
 
   try {
@@ -158,7 +156,7 @@ async function generateAnswer(question) {
       const chunkText = chunk.text();
 
       output.innerHTML += chunkText;
-      tts(removeFunction(chunkText));
+      await tts(removeFunction(chunkText));
     }
 
     // Nachdem die Antwort generiert wurde, die Spracherkennung fortsetzen
@@ -173,23 +171,22 @@ async function generateAnswer(question) {
   }
 }
 
-function tts(text) {
+async function tts(text) {
+  window.speechSynthesis.cancel();
   speechRecognition.stop();
   const msg = new SpeechSynthesisUtterance();
   msg.text = text;
-  speechSynthesis.getVoices().forEach(function (voice) {
-    console.log(voice.name, voice.lang);
-    if (voice.name == "eSpeak German") {
-      console.error(voice.name);
-      msg.voice = voice;
-    }
-  });
   msg.volume = 1;
   window.speechSynthesis.speak(msg);
+  return new Promise((resolve, reject) => {
+    msg.onend = () => {
+      resolve();
+    };
+  });
 }
 
 function removeFunction(inputString) {
-  return inputString.replace(/[^\w\säöüÄÖÜ,.!?]/g, "");
+  return inputString.replace(/[^\w\säöüÄÖÜ,.!?ß]/g, "");
 }
 speechRecognition.start();
 
