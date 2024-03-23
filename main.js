@@ -44,7 +44,7 @@ const safetySettings = [
     threshold: HarmBlockThreshold.BLOCK_NONE,
   },
 ];
-/*
+
 const safetySettings = [
     {
       category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -64,7 +64,7 @@ const safetySettings = [
     },
   ];
 
-*/
+
 // DOM-Elemente
 const form = document.querySelector("form");
 const promptInput = document.getElementById("prompt");
